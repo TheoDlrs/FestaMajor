@@ -241,7 +241,7 @@ new class extends Component {
         @if($selectedOrder)
             <div class="space-y-8">
                 <!-- Modal Header -->
-                <div class="flex justify-between items-start border-b border-zinc-100 dark:border-zinc-800 pb-6">
+                <div class="flex justify-between items-start border-b border-zinc-100 dark:border-zinc-800 pb-6 pr-12">
                     <div>
                         <div class="flex items-center gap-3 mb-2">
                             <h3 class="text-2xl font-bold">Commande {{ $selectedOrder->reference }}</h3>

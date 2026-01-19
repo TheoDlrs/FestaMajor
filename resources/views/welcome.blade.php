@@ -381,22 +381,22 @@
                      class="w-full h-full object-contain aspect-[4/5]" />
             </div>
             
-            <div class="absolute -bottom-6 -right-6 bg-white text-zinc-900 p-6 rounded-2xl shadow-xl max-w-xs hidden md:block z-20">
-                <p class="font-heading font-bold text-lg mb-1">"{{ __('La force de l\'unité.') }}"</p>
-                <p class="text-xs text-zinc-500 uppercase tracking-widest">{{ __('Devise Castellers') }}</p>
+            <div class="absolute -top-14 -right-4 bg-white text-zinc-900 p-6 rounded-2xl shadow-xl max-w-xs hidden md:block z-20 rotate-[20deg]">
+                <p class="font-heading font-bold text-lg mb-1">"{{ $activeFlyer->quote_text ?? __('La force de l\'unité.') }}"</p>
+                <p class="text-xs text-zinc-500 uppercase tracking-widest">{{ $activeFlyer->quote_author ?? __('Devise Castellers') }}</p>
             </div>
         </div>
 
         <div class="order-1 lg:order-2 space-y-8">
             <div>
-                <h2 class="text-festa-gold text-xs font-black uppercase tracking-[0.4em] mb-4">{{ __('L\'Héritage') }}</h2>
+                <h2 class="text-festa-gold text-xs font-black uppercase tracking-[0.4em] mb-4">{{ $activeFlyer->subtitle ?? __('L\'Héritage') }}</h2>
                 <h3 class="font-heading text-5xl md:text-6xl font-black text-white leading-none">
-                    {{ __('Terre de') }} <br> <span class="text-festa-red italic">{{ __('Feu & d\'Or') }}</span>.
+                    {!! $activeFlyer->headline ?? __('Terre de') . ' <br> <span class="text-festa-red italic">' . __('Feu & d\'Or') . '</span>.' !!}
                 </h3>
             </div>
             
             <p class="text-lg text-zinc-400 leading-relaxed border-l-2 border-festa-gold/30 pl-6">
-                {{ __('La Festa Major n\'est pas un simple festival. C\'est le moment où Saint-Cyprien renoue avec ses racines. Des Correfocs qui illuminent les ruelles aux Sardanes sur le parvis, chaque instant est une célébration de notre identité catalane.') }}
+                {{ $activeFlyer->description ?? __('La Festa Major n\'est pas un simple festival. C\'est le moment où Saint-Cyprien renoue avec ses racines. Des Correfocs qui illuminent les ruelles aux Sardanes sur le parvis, chaque instant est une célébration de notre identité catalane.') }}
             </p>
 
             <div class="grid grid-cols-3 gap-6 pt-6 border-t border-white/10">

@@ -13,8 +13,14 @@ return new class extends Migration
     {
         Schema::create('flyers', function (Blueprint $row) {
             $row->id();
-            $row->string('title');
+            $row->string('title'); // Internal name
             $row->string('image_url');
+            
+            // Content for the Homepage Section
+            $row->string('subtitle')->nullable(); // "L'Héritage"
+            $row->string('headline')->nullable(); // "Terre de Feu & d'Or"
+            $row->text('description')->nullable(); // Paragraph text
+            
             $row->boolean('is_active')->default(true);
             $row->timestamps();
         });
