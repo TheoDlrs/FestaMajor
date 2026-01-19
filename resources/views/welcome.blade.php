@@ -391,7 +391,11 @@
             <div>
                 <h2 class="text-festa-gold text-xs font-black uppercase tracking-[0.4em] mb-4">{{ $activeFlyer->subtitle ?? __('L\'Héritage') }}</h2>
                 <h3 class="font-heading text-5xl md:text-6xl font-black text-white leading-none">
-                    {!! $activeFlyer->headline ?? __('Terre de') . ' <br> <span class="text-festa-red italic">' . __('Feu & d\'Or') . '</span>.' !!}
+                    @if($activeFlyer && $activeFlyer->headline)
+                        {{ $activeFlyer->headline }}
+                    @else
+                        {!! __('Terre de') . ' <br> <span class="text-festa-red italic">' . __('Feu & d\'Or') . '</span>.' !!}
+                    @endif
                 </h3>
             </div>
             
@@ -494,7 +498,7 @@
 
             @foreach($loopImages as $image)
                 <div class="relative w-[300px] md:w-[450px] h-[250px] md:h-[350px] flex-shrink-0 rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500 hover:scale-105 hover:border-festa-gold/50 hover:z-30 cursor-pointer">
-                    <img src="{{ $image->image_url }}" loading="lazy" class="w-full h-full object-cover grayscale-[0.3] hover:grayscale-0 transition-all duration-700" alt="Souvenir">
+                    <img src="{{ $image->image_url }}" loading="lazy" class="w-full h-full object-cover grayscale-[0.3] hover:grayscale-0 transition-all duration-700" alt="{{ $image->alt_text ?? __('Souvenir Festa Major') }}">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-20 transition"></div>
                 </div>
             @endforeach

@@ -4,12 +4,24 @@ namespace Database\Seeders;
 
 use App\Models\GalleryImage;
 use App\Models\ProgramEvent;
+use App\Models\Flyer;
 use Illuminate\Database\Seeder;
 
 class ContentSeeder extends Seeder
 {
     public function run(): void
     {
+        // Flyer Home
+        Flyer::updateOrCreate(['title' => 'Flyer Principal (Original)'], [
+            'image_url' => 'https://www.escapadeslr.com/img/agenda/1356-festa-major-saint-cyprien-2.jpg',
+            'subtitle' => 'L\'Héritage',
+            'headline' => 'Terre de Feu & d\'Or',
+            'description' => 'La Festa Major n\'est pas un simple festival. C\'est le moment où Saint-Cyprien renoue avec ses racines. Des Correfocs qui illuminent les ruelles aux Sardanes sur le parvis, chaque instant est une célébration de notre identité catalane.',
+            'quote_text' => 'La force de l\'unité.',
+            'quote_author' => 'Devise Castellers',
+            'is_active' => true
+        ]);
+
         // Program
         $events = [
             [

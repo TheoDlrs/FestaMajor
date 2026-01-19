@@ -16,6 +16,10 @@ Route::view('plan-festa', 'pages.planfeste')->name('plan-festa');
 
 // Route temporaire pour prévisualiser le mail de contact
 Route::get('/preview-mail', function () {
+    if (!app()->isLocal()) {
+        abort(404);
+    }
+
     $type = request('type', 'info');
     
     $data = match($type) {
@@ -99,5 +103,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('orders/{order}/invoice', [\App\Http\Controllers\InvoiceController::class, 'download'])->name('orders.invoice');
 });
+
+// Surcharge de la route d'inscription pour appliquer le Rate Limiting (3/heure)
+Route::post('/register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
+    ->middleware(['guest', 'throttle:register'])
+    ->name('register');
 
 require __DIR__.'/settings.php';
