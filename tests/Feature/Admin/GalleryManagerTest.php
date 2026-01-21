@@ -7,6 +7,7 @@ use App\Models\GalleryImage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
 
@@ -60,5 +61,19 @@ class GalleryManagerTest extends TestCase
         $this->assertDatabaseHas('gallery_images', [
             'image_url' => 'https://example.com/image.jpg',
         ]);
+    }
+
+    public function test_cache_is_cleared_on_save()
+    {
+        Cache::spy();
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin);
+
+        Volt::test('admin.gallery-manager')
+            ->call('create')
+            ->set('image_url', 'https://example.com/image.jpg')
+            ->call('save');
+
+        Cache::shouldHaveReceived('forget')->with('gallery_images');
     }
 }

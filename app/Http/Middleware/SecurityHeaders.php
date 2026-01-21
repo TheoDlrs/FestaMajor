@@ -21,6 +21,11 @@ class SecurityHeaders
         $response->headers->set('X-Content-Type-Options', 'nosniff'); // Empêche le sniffing MIME
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin'); // Protège la vie privée
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()'); // Bloque l'accès aux capteurs inutilement
+        
+        // HSTS (HTTP Strict Transport Security) - Force HTTPS for 1 year
+        if (app()->environment('production')) {
+            $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        }
 
         return $response;
     }

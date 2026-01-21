@@ -15,6 +15,12 @@
     <meta property="og:image" content="{{ asset('images/logo-festa.png') }}">
     <meta property="og:url" content="{{ route('home') }}">
     
+    <!-- SEO & Performance -->
+    <meta name="robots" content="index, follow">
+    <link rel="alternate" hreflang="fr" href="{{ route('home') }}" />
+    <link rel="alternate" hreflang="ca" href="{{ route('home') }}" />
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop" fetchpriority="high">
+
     <link rel="canonical" href="{{ url()->current() }}" />
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700|playfair-display:400,600,700,900" rel="stylesheet" />
@@ -217,8 +223,8 @@
                 started: false,
                 timer: null,
                 init() {
-                    // --- MODE RÉEL ---
-                    const targetDate = new Date('September 18, 2026 18:00:00').getTime();
+                    // --- MODE TEST (10s) ---
+                    const targetDate = new Date().getTime() + 10000;
 
                     this.timer = setInterval(() => {
                         const now = new Date().getTime();
@@ -378,21 +384,22 @@
                 <img src="{{ $activeFlyer ? $activeFlyer->image_url : 'https://www.escapadeslr.com/img/agenda/1356-festa-major-saint-cyprien-2.jpg' }}" 
                      alt="{{ $activeFlyer ? $activeFlyer->title : __('Flyer Festa Major') }}" 
                      loading="lazy"
-                     class="w-full h-full object-contain aspect-[4/5]" />
+                     onerror="this.onerror=null; this.src='https://placehold.co/600x800/171717/EAB308?text=Image+Indisponible';"
+                     class="w-full h-auto" />
             </div>
             
             <div class="absolute -top-14 -right-4 bg-white text-zinc-900 p-6 rounded-2xl shadow-xl max-w-xs hidden md:block z-20 rotate-[20deg]">
-                <p class="font-heading font-bold text-lg mb-1">"{{ $activeFlyer->quote_text ?? __('La force de l\'unité.') }}"</p>
-                <p class="text-xs text-zinc-500 uppercase tracking-widest">{{ $activeFlyer->quote_author ?? __('Devise Castellers') }}</p>
+                <p class="font-heading font-bold text-lg mb-1">"{{ __($activeFlyer->quote_text ?? 'La force de l\'unité.') }}"</p>
+                <p class="text-xs text-zinc-500 uppercase tracking-widest">{{ __($activeFlyer->quote_author ?? 'Devise Castellers') }}</p>
             </div>
         </div>
 
         <div class="order-1 lg:order-2 space-y-8">
             <div>
-                <h2 class="text-festa-gold text-xs font-black uppercase tracking-[0.4em] mb-4">{{ $activeFlyer->subtitle ?? __('L\'Héritage') }}</h2>
+                <h2 class="text-festa-gold text-xs font-black uppercase tracking-[0.4em] mb-4">{{ __($activeFlyer->subtitle ?? 'L\'Héritage') }}</h2>
                 <h3 class="font-heading text-5xl md:text-6xl font-black text-white leading-none">
                     @if($activeFlyer && $activeFlyer->headline)
-                        {{ $activeFlyer->headline }}
+                        {{ __($activeFlyer->headline) }}
                     @else
                         {!! __('Terre de') . ' <br> <span class="text-festa-red italic">' . __('Feu & d\'Or') . '</span>.' !!}
                     @endif
@@ -400,7 +407,7 @@
             </div>
             
             <p class="text-lg text-zinc-400 leading-relaxed border-l-2 border-festa-gold/30 pl-6">
-                {{ $activeFlyer->description ?? __('La Festa Major n\'est pas un simple festival. C\'est le moment où Saint-Cyprien renoue avec ses racines. Des Correfocs qui illuminent les ruelles aux Sardanes sur le parvis, chaque instant est une célébration de notre identité catalane.') }}
+                {{ __($activeFlyer->description ?? 'La Festa Major n\'est pas un simple festival. C\'est le moment où Saint-Cyprien renoue avec ses racines. Des Correfocs qui illuminent les ruelles aux Sardanes sur le parvis, chaque instant est une célébration de notre identité catalane.') }}
             </p>
 
             <div class="grid grid-cols-3 gap-6 pt-6 border-t border-white/10">
@@ -444,6 +451,7 @@
                 <div class="group relative aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer {{ $event->is_featured ? 'ring-2 ring-festa-gold/50' : '' }}">
                     <img src="{{ $event->image_url }}" 
                          loading="lazy"
+                         onerror="this.onerror=null; this.src='https://placehold.co/600x800/171717/EAB308?text=Image+Indisponible';"
                          class="absolute inset-0 w-full h-full object-cover transition duration-700 group-hover:scale-110" 
                          alt="{{ $event->title }}">
                     <div class="absolute inset-0 bg-gradient-to-t {{ $event->is_featured ? 'from-festa-red-dark/90' : 'from-black' }} via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition duration-500">
@@ -498,7 +506,7 @@
 
             @foreach($loopImages as $image)
                 <div class="relative w-[300px] md:w-[450px] h-[250px] md:h-[350px] flex-shrink-0 rounded-2xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500 hover:scale-105 hover:border-festa-gold/50 hover:z-30 cursor-pointer">
-                    <img src="{{ $image->image_url }}" loading="lazy" class="w-full h-full object-cover grayscale-[0.3] hover:grayscale-0 transition-all duration-700" alt="{{ $image->alt_text ?? __('Souvenir Festa Major') }}">
+                    <img src="{{ $image->image_url }}" loading="lazy" onerror="this.onerror=null; this.src='https://placehold.co/600x400/171717/EAB308?text=Image+Indisponible';" class="w-full h-full object-cover grayscale-[0.3] hover:grayscale-0 transition-all duration-700" alt="{{ $image->alt_text ?? __('Souvenir Festa Major') }}">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-20 transition"></div>
                 </div>
             @endforeach

@@ -3,9 +3,12 @@
 use Livewire\Volt\Component;
 use App\Models\ProgramEvent;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Cache;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public $search = '';
     
@@ -14,6 +17,7 @@ new class extends Component {
     public $time = '';
     public $description = '';
     public $image_url = '';
+    public $photo;
     public $is_featured = false;
     public $order = 0;
     
@@ -30,7 +34,7 @@ new class extends Component {
 
     public function create()
     {
-        $this->reset(['eventId', 'title', 'time', 'description', 'image_url', 'is_featured', 'order']);
+        $this->reset(['eventId', 'title', 'time', 'description', 'image_url', 'photo', 'is_featured', 'order']);
         $this->showModal = true;
     }
 
@@ -41,6 +45,7 @@ new class extends Component {
         $this->time = $event->time;
         $this->description = $event->description;
         $this->image_url = $event->image_url;
+        $this->photo = null;
         $this->is_featured = $event->is_featured;
         $this->order = $event->order;
         $this->showModal = true;
@@ -52,10 +57,16 @@ new class extends Component {
             'title' => 'required|string|max:255',
             'time' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'image_url' => 'required|url',
+            'image_url' => 'required_without:photo',
+            'photo' => 'nullable|image|max:10240', // 10MB max
             'is_featured' => 'boolean',
             'order' => 'integer',
         ]);
+
+        if ($this->photo) {
+            $path = $this->photo->store('program', 'public');
+            $this->image_url = Storage::url($path);
+        }
 
         ProgramEvent::updateOrCreate(['id' => $this->eventId], [
             'title' => $this->title,
@@ -66,6 +77,8 @@ new class extends Component {
             'order' => $this->order,
         ]);
 
+        Cache::forget('program_events');
+
         $this->showModal = false;
         $this->dispatch('event-saved', message: 'Événement enregistré.');
     }
@@ -73,6 +86,7 @@ new class extends Component {
     public function delete(ProgramEvent $event)
     {
         $event->delete();
+        Cache::forget('program_events');
         $this->dispatch('event-saved', message: 'Événement supprimé.');
     }
 }; ?>
@@ -154,13 +168,48 @@ new class extends Component {
                 <flux:input label="Titre" wire:model="title" required />
                 <flux:input label="Horaire / Date (ex: Sam. 13 Sept. — 23h00)" wire:model="time" required />
                 <flux:textarea label="Description" wire:model="description" />
-                <flux:input label="URL de l'image" wire:model="image_url" required />
+                
+                <div>
+                    <label class="block text-sm font-medium text-zinc-800 dark:text-zinc-200 mb-2">Importer une image (Prioritaire)</label>
+                    <input type="file" wire:model.live="photo" accept="image/png, image/jpeg, image/jpg, image/webp" class="block w-full text-sm text-zinc-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-festa-gold/10 file:text-festa-gold
+                        hover:file:bg-festa-gold/20
+                        mt-2
+                    "/>
+                    @error('photo') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="text-center text-xs text-zinc-500 uppercase tracking-widest font-bold">OU</div>
+
+                <flux:input label="URL de l'image (Lien externe)" wire:model="image_url" placeholder="https://..." />
+
                 <div class="grid grid-cols-2 gap-4">
                     <flux:input label="Ordre d'affichage" type="number" wire:model="order" />
                     <div class="flex items-center pt-6">
                         <flux:checkbox label="Événement Phare" wire:model="is_featured" />
                     </div>
                 </div>
+
+                @if($photo)
+                    <div class="relative">
+                        <p class="text-xs text-zinc-500 mb-2">Aperçu du fichier :</p>
+                        @if($photo->isPreviewable())
+                            <img src="{{ $photo->temporaryUrl() }}" class="h-32 w-full object-contain bg-zinc-100 rounded-lg">
+                        @else
+                            <div class="h-32 w-full flex items-center justify-center bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-500 text-xs p-4 text-center">
+                                Format non supporté pour l'aperçu.
+                            </div>
+                        @endif
+                    </div>
+                @elseif($image_url)
+                    <div class="relative">
+                        <p class="text-xs text-zinc-500 mb-2">Aperçu actuel :</p>
+                        <img src="{{ $image_url }}" class="h-32 w-full object-contain bg-zinc-100 rounded-lg" onerror="this.src='https://placehold.co/600x400/171717/EAB308?text=Image+Indisponible'">
+                    </div>
+                @endif
             </div>
             <div class="flex gap-3">
                 <flux:button variant="ghost" class="flex-1" wire:click="$set('showModal', false)">Annuler</flux:button>

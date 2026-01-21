@@ -5,6 +5,7 @@ use App\Models\GalleryImage;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 new class extends Component {
     use WithPagination, WithFileUploads;
@@ -59,6 +60,8 @@ new class extends Component {
             'order' => $this->order,
         ]);
 
+        Cache::forget('gallery_images');
+
         $this->showModal = false;
         $this->dispatch('image-saved', message: 'Image enregistrée.');
     }
@@ -66,6 +69,7 @@ new class extends Component {
     public function delete(GalleryImage $image)
     {
         $image->delete();
+        Cache::forget('gallery_images');
         $this->dispatch('image-saved', message: 'Image supprimée.');
     }
 }; ?>
@@ -116,7 +120,7 @@ new class extends Component {
                 
                 <div>
                     <label class="block text-sm font-medium text-zinc-800 dark:text-zinc-200 mb-2">Importer une image (Prioritaire)</label>
-                    <input type="file" wire:model.live="photo" class="block w-full text-sm text-zinc-500
+                    <input type="file" wire:model.live="photo" accept="image/png, image/jpeg, image/jpg, image/webp" class="block w-full text-sm text-zinc-500
                         file:mr-4 file:py-2 file:px-4
                         file:rounded-full file:border-0
                         file:text-sm file:font-semibold
@@ -141,7 +145,13 @@ new class extends Component {
                 @if($photo)
                     <div class="relative">
                         <p class="text-xs text-zinc-500 mb-2">Aperçu du fichier :</p>
-                        <img src="{{ $photo->temporaryUrl() }}" class="h-32 w-full object-contain bg-zinc-100 rounded-lg">
+                        @if($photo->isPreviewable())
+                            <img src="{{ $photo->temporaryUrl() }}" class="h-32 w-full object-contain bg-zinc-100 rounded-lg">
+                        @else
+                            <div class="h-32 w-full flex items-center justify-center bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-500 text-xs p-4 text-center">
+                                Format non supporté pour l'aperçu.
+                            </div>
+                        @endif
                     </div>
                 @elseif($image_url)
                     <div class="relative">
