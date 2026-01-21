@@ -3,12 +3,15 @@
 use Livewire\Volt\Component;
 use App\Models\GalleryImage;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 
 new class extends Component {
-    use WithPagination;
+    use WithPagination, WithFileUploads;
 
     public $imageId = null;
     public $image_url = '';
+    public $photo;
     public $is_featured = false;
     public $order = 0;
     public $showModal = false;
@@ -22,7 +25,7 @@ new class extends Component {
 
     public function create()
     {
-        $this->reset(['imageId', 'image_url', 'is_featured', 'order']);
+        $this->reset(['imageId', 'image_url', 'photo', 'is_featured', 'order']);
         $this->showModal = true;
     }
 
@@ -30,6 +33,7 @@ new class extends Component {
     {
         $this->imageId = $image->id;
         $this->image_url = $image->image_url;
+        $this->photo = null;
         $this->is_featured = $image->is_featured;
         $this->order = $image->order;
         $this->showModal = true;
@@ -38,10 +42,16 @@ new class extends Component {
     public function save()
     {
         $this->validate([
-            'image_url' => 'required|url',
+            'image_url' => 'required_without:photo',
+            'photo' => 'nullable|image|max:10240', // 10MB max
             'is_featured' => 'boolean',
             'order' => 'integer',
         ]);
+
+        if ($this->photo) {
+            $path = $this->photo->store('gallery', 'public');
+            $this->image_url = Storage::url($path);
+        }
 
         GalleryImage::updateOrCreate(['id' => $this->imageId], [
             'image_url' => $this->image_url,
@@ -103,15 +113,41 @@ new class extends Component {
         <form wire:submit="save" class="space-y-6">
             <h3 class="text-lg font-bold">{{ $imageId ? 'Modifier' : 'Ajouter' }} une photo</h3>
             <div class="space-y-4">
-                <flux:input label="URL de l'image" wire:model.live="image_url" required />
+                
+                <div>
+                    <label class="block text-sm font-medium text-zinc-800 dark:text-zinc-200 mb-2">Importer une image (Prioritaire)</label>
+                    <input type="file" wire:model.live="photo" class="block w-full text-sm text-zinc-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-festa-gold/10 file:text-festa-gold
+                        hover:file:bg-festa-gold/20
+                        mt-2
+                    "/>
+                    @error('photo') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="text-center text-xs text-zinc-500 uppercase tracking-widest font-bold">OU</div>
+
+                <flux:input label="URL de l'image (Lien externe)" wire:model="image_url" placeholder="https://..." />
+                
                 <div class="grid grid-cols-2 gap-4">
                     <flux:input label="Ordre" type="number" wire:model="order" />
                     <div class="flex items-center pt-6">
                         <flux:checkbox label="Format Large (Grid)" wire:model="is_featured" />
                     </div>
                 </div>
-                @if($image_url)
-                    <img src="{{ $image_url }}" class="h-32 w-full object-contain bg-zinc-100 rounded-lg">
+
+                @if($photo)
+                    <div class="relative">
+                        <p class="text-xs text-zinc-500 mb-2">Aperçu du fichier :</p>
+                        <img src="{{ $photo->temporaryUrl() }}" class="h-32 w-full object-contain bg-zinc-100 rounded-lg">
+                    </div>
+                @elseif($image_url)
+                    <div class="relative">
+                        <p class="text-xs text-zinc-500 mb-2">Aperçu actuel :</p>
+                        <img src="{{ $image_url }}" class="h-32 w-full object-contain bg-zinc-100 rounded-lg">
+                    </div>
                 @endif
             </div>
             <div class="flex gap-3">
